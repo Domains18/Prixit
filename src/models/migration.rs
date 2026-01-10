@@ -3,10 +3,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Migration {
-    pub id: string,
-    pub name: string,
+    pub id: String,
+    pub name: String,
     pub timestamp: DateTime<Utc>,
-    pub sql_content: string,
+    pub sql_content: String,
     pub operations: Vec<SqlOperation>,
     pub affected_tables: Vec<String>,
 }
@@ -26,11 +26,11 @@ pub enum SqlOperation {
     CreateIndex {
         index_name: String,
         table_name: String,
-        columns: Vec<Sting>,
+        columns: Vec<String>,
         unique: bool,
     },
 
-    DeopIndex {
+    DropIndex {
         index_name: String,
     },
 }
