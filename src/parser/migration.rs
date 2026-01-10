@@ -88,3 +88,28 @@ impl MigrationDiscovery {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_migration_name() {
+        let (timestamp, name) =
+            MigrationDiscovery::parse_migration_name("20231201120000_init").unwrap();
+
+        assert_eq!(name, "init");
+        assert_eq!(
+            timestamp.format("%Y%m%d%H%M%S").to_string(),
+            "20231201120000"
+        );
+    }
+
+    #[test]
+    fn test_parse_migration_name_with_underscores() {
+        let (_, name) =
+            MigrationDiscovery::parse_migration_name("20231201120000_add_user_table").unwrap();
+
+        assert_eq!(name, "add user table")
+    }
+}
