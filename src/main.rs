@@ -2,7 +2,7 @@ mod error;
 mod models;
 mod cli;
 mod models;
-
+mod parser;
 
 
 use clap::Parser;
