@@ -20,7 +20,7 @@ pub enum SqlOperation {
 
     AlterTable {
         table_name: String,
-        alterations: Vec<TableALteration>,
+        alterations: Vec<TableAlteration>,
     },
 
     CreateIndex {
@@ -28,6 +28,10 @@ pub enum SqlOperation {
         table_name: String,
         columns: Vec<String>,
         unique: bool,
+    },
+
+    DropTable{
+        table_name: String
     },
 
     DropIndex {
@@ -44,13 +48,13 @@ pub struct ColumnDefinition {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum TableALteration {
+pub enum TableAlteration {
     AddColumn(ColumnDefinition),
     DropColumn(String),
     AlterColumn {
         column_name: String,
-        new_type: String,
-        new_nullable: String,
+        new_type: Option<String>,
+        new_nullable: Option<bool>
     },
     AddForeignKey {
         constraint_name: String,

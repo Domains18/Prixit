@@ -1,33 +1,37 @@
 [package]
 name = "migration-analyzer"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
+# CLI framework
 clap = { version = "4.5", features = ["derive"] }
 
-sqlParser = "0.52"
+# SQL parsing
+sqlparser = "0.52"
 
-
+# Serialization/deserialization
 serde = { version = "1.0", features = ["derive"] }
-serder_json = "1.0"
+serde_json = "1.0"
 
-
+# File system operations
 walkdir = "2.5"
 
+# Terminal output
 colored = "2.1"
 
-
+# Error handling
 anyhow = "1.0"
 thiserror = "1.0"
 
-
+# Date/time
 chrono = "0.4"
 
-
+# Regex for parsing
 regex = "1.10"
 
-tokio ={ version = "1.40", features = ["full"]}
+# Async runtime (for future DB introspection)
+tokio = { version = "1.40", features = ["full"] }
 
-
-sqlx ={ version = "0.8", features = ["postgres", "runtime-tokio-native-tls"]}
+# Database drivers (optional, for introspection phase)
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio-native-tls"], optional = true }
