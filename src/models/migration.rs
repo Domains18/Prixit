@@ -53,7 +53,7 @@ pub enum TableAlteration {
     DropColumn(String),
     AlterColumn {
         column_name: String,
-        new_type: String,
+        new_type: Option<String>,
         new_nullable: Option<bool>
     },
     AddForeignKey {

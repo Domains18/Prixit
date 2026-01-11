@@ -25,7 +25,7 @@ impl SqlParser {
 
     fn parse_statement(statement: Statement) -> Result<Option<SqlOperation>> {
         match statement {
-            Statement::CreateTable { name, columns, .. } => {
+            Statement::CreateTable { .. } => {
                 let table_name = name.to_string();
                 let colum_defs = columns.iter().map(Self::parse_column_def).collect();
 
@@ -35,7 +35,7 @@ impl SqlParser {
                 }))
             }
 
-            Statement::AlterTable { name, operations } => {
+            Statement::AlterTable { name, operations, .. } => {
                 let table_name = name.to_string();
                 let alterations = operations
                     .iter()
@@ -59,17 +59,19 @@ impl SqlParser {
             }
 
             Statement::CreateIndex {
-                name,
-                table_name,
-                columns,
-                unique,
                 ..
             } => {
-                let index_name = name.map(|n| n.to_string()).unwrap_or_default();
-                let table = table_name.toString();
-
-                let column_names = columns.iter().map(|col| col.to_string()).collect();
-
+                let index_name = name
+                    .map(|n| n.to_string())
+                    .unwrap_or_default();
+            
+                let table = table_name.to_string();
+            
+                let column_names = columns
+                    .iter()
+                    .map(|col| col.expr.to_string())
+                    .collect();
+            
                 Ok(Some(SqlOperation::CreateIndex {
                     index_name,
                     table_name: table,
@@ -77,6 +79,7 @@ impl SqlParser {
                     unique,
                 }))
             }
+            
             _ => Ok(None),
         }
     }
@@ -91,7 +94,7 @@ impl SqlParser {
 
 
         let default = col.options.iter().find_map(|opt| {
-            if let sqlparser::ast::ColumnOption::Default(expr) => &opt.option{
+            if let sqlparser::ast::ColumnOption::Default(expr) = &opt.option{
                 Some(expr.to_string())
             } else {
                 None
@@ -101,18 +104,18 @@ impl SqlParser {
         ColumnDefinition { name, data_type, nullable, default }
     }
 
-    fn parse_alter_operation(op: &AlterTableOperation) -> Option<TableALteration>{
+    fn parse_alter_operation(op: &AlterTableOperation) -> Option<TableAlteration>{
         match op {
             AlterTableOperation::AddColumn{column_def, ..}=>{
-                Some(TableALteration::AddColumn(Self::parse_column_def(column_def)))
+                Some(TableAlteration::AddColumn(Self::parse_column_def(column_def)))
             }
 
             AlterTableOperation::DropColumn{column_name, ..}=>{
-                Some(TableALteration::DropColumn(column_name.to_string()))
+                Some(TableAlteration::DropColumn(column_name.to_string()))
             }
 
             AlterTableOperation::AlterColumn { column_name, op }=>{
-                Some(TableALteration::AlterColumn { column_name: column_name.to_string(), new_type: None, new_nullable: None })
+                Some(TableAlteration::AlterColumn { column_name: column_name.to_string(), new_type: None, new_nullable: None, })
             }
             _ => None,
         }
@@ -120,7 +123,7 @@ impl SqlParser {
 
 
     pub fn extract_affected_tables(operations: &[SqlOperation]) -> Vec<String>{
-        let mut tables = Vec::new()
+        let mut tables = Vec::new();
 
         for op in operations {
             match op {
@@ -143,5 +146,36 @@ impl SqlParser {
         tables.sort();
         tables.dedup();
         tables
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+
+    #[test]
+    fn parse_parse_create_table(){
+        let sql = r#"
+            CREATE TABLE "User"(
+                "id" TEXT NOT NULL,
+                "email" TEXT,
+                PRIMARY KEY ("id")
+            );
+        "#;
+
+        let operations = SqlParser::parse(sql).unwrap();
+        assert_eq!(operations.len(), 1);
+        
+
+        if let SqlOperation::CreateTable { table_name, columns } = &operations[0]{
+            assert_eq!(table_name, "\"User\"");
+            assert_eq!(columns.len(), 3);
+            assert_eq!(columns[0].name, "id");
+            assert!(!columns[0].nullable);
+        } else {
+            panic!("Expected CreateTable Operations");
+        }
     }
 }
