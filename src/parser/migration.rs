@@ -2,7 +2,6 @@ use crate::error::{AnalyzeError, Result};
 use crate::models::{Migration, SqlOperation};
 use chrono::{DateTime, NaiveDateTime, Utc};
 use regex::Regex;
-use std::fmt::format;
 use std::fs;
 use std::path::Path;
 use walkdir::WalkDir;
@@ -15,7 +14,7 @@ impl MigrationDiscovery {
 
         if !path.exists() {
             return Err(AnalyzeError::MigrationDirError(format!(
-                "Directort does not exist: {}",
+                "Directory does not exist: {}",
                 migration_path
             )));
         }
@@ -28,7 +27,7 @@ impl MigrationDiscovery {
             .into_iter()
             .filter_map(|e| e.ok())
         {
-            if entry.file_type().id_dir() {
+            if entry.file_type().is_dir() {
                 if let Some(migration) = Self::parse_migration_dir(entry.path())? {
                     migrations.push(migration);
                 }

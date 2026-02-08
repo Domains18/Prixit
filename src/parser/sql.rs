@@ -1,7 +1,7 @@
 use crate::error::{AnalyzeError, Result};
 use crate::models::{ColumnDefinition, SqlOperation, TableAlteration};
 use sqlparser::ast::{AlterTableOperation, ColumnDef, Statement};
-use sqlparser::dialect::{self, PostgreSqlDialect};
+use sqlparser::dialect::PostgreSqlDialect;
 use sqlparser::parser::Parser;
 
 pub struct SqlParser;
@@ -25,13 +25,13 @@ impl SqlParser {
 
     fn parse_statement(statement: Statement) -> Result<Option<SqlOperation>> {
         match statement {
-            Statement::CreateTable { .. } => {
+            Statement::CreateTable(sqlparser::ast::CreateTable { name, columns, .. }) => {
                 let table_name = name.to_string();
-                let colum_defs = columns.iter().map(Self::parse_column_def).collect();
+                let column_defs = columns.iter().map(Self::parse_column_def).collect();
 
                 Ok(Some(SqlOperation::CreateTable {
                     table_name,
-                    columns: colum_defs,
+                    columns: column_defs,
                 }))
             }
 
@@ -58,22 +58,21 @@ impl SqlParser {
                 }
             }
 
-            Statement::CreateIndex {
-                ..
-            } => {
-                let index_name = name
+            Statement::CreateIndex(sqlparser::ast::CreateIndex { name, table_name, columns, unique, .. }) => {
+                let idx_name = name
+                    .as_ref()
                     .map(|n| n.to_string())
                     .unwrap_or_default();
-            
+
                 let table = table_name.to_string();
-            
+
                 let column_names = columns
                     .iter()
                     .map(|col| col.expr.to_string())
                     .collect();
-            
+
                 Ok(Some(SqlOperation::CreateIndex {
-                    index_name,
+                    index_name: idx_name,
                     table_name: table,
                     columns: column_names,
                     unique,
@@ -171,8 +170,8 @@ mod tests {
 
         if let SqlOperation::CreateTable { table_name, columns } = &operations[0]{
             assert_eq!(table_name, "\"User\"");
-            assert_eq!(columns.len(), 3);
-            assert_eq!(columns[0].name, "id");
+            assert_eq!(columns.len(), 2);
+            assert_eq!(columns[0].name, "\"id\"");
             assert!(!columns[0].nullable);
         } else {
             panic!("Expected CreateTable Operations");

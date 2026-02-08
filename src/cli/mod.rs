@@ -2,11 +2,11 @@
 
 use clap::{Parser, Subcommand};
 
-#[derive({Parser})]
+#[derive(Parser)]
 #[command(name = "migration-analyzer")]
 #[command(about = "analyze Prisma Migrations for issues and Optimizations", long_about = None)]
 pub struct Cli {
-    #[command(Subcommand)]
+    #[command(subcommand)]
     pub command: Commands,
 }
 

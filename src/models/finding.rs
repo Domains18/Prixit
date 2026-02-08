@@ -36,19 +36,19 @@ impl Finding {
             suggestion: None,
         }
     }
-}
 
-pub fn with_migration(mut self, migration_id: impl Into<String>) -> Self {
-    self.migration_id = Some(migration_id.into());
-    self
-}
+    pub fn with_migration(mut self, migration_id: impl Into<String>) -> Self {
+        self.migration_id = Some(migration_id.into());
+        self
+    }
 
-pub fn with_table(mut self, table: impl Into<String>) -> Self {
-    self.table = Some(table.into());
-    self
-}
+    pub fn with_table(mut self, table: impl Into<String>) -> Self {
+        self.table = Some(table.into());
+        self
+    }
 
-pub fn with_migration(mut self, suggestion: impl Into<String>) -> Self {
-    self.suggestion = Some(suggestion.into());
-    self
+    pub fn with_suggestion(mut self, suggestion: impl Into<String>) -> Self {
+        self.suggestion = Some(suggestion.into());
+        self
+    }
 }

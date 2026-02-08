@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Error. Debug)]
+#[derive(Error, Debug)]
 pub enum AnalyzeError {
     #[error("failed to read migration directory: {0}")]
     MigrationDirError(String),
@@ -11,7 +11,7 @@ pub enum AnalyzeError {
     #[error("failed to parse Prisma schema: {0}")]
     SchemaParseError(String),
 
-    #[error["IO error: {0}"]]
+    #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
 
     #[error("invalid migration format: {0}")]

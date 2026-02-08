@@ -1,6 +1,5 @@
 
 # Prisma Migration Analyzer
-I have been learning rust for the better part of 2025, decided to build this to test my Rust skills so far
 
 ## Core Problem It Solves
 As applications grow, migration files pile up and teams lose visibility into what's actually happening with their schema over time. You end up with questions like: "Why is this query slow?", "When did we add this index?", "Which migrations are safe to squash?", "What's the actual production schema vs what Prisma thinks it is?"
@@ -27,4 +26,3 @@ Generate schema change timeline showing how your database evolved
 Create dependency graphs showing table relationships
 Export migration impact reports before deploying to production
 Compare schemas across environments (dev vs staging vs prod)
-
