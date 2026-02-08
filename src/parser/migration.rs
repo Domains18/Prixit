@@ -1,5 +1,6 @@
 use crate::error::{AnalyzeError, Result};
-use crate::models::{Migration, SqlOperation};
+use crate::models::Migration;
+use crate::parser::sql::SqlParser;
 use chrono::{DateTime, NaiveDateTime, Utc};
 use regex::Regex;
 use std::fs;
@@ -53,6 +54,8 @@ impl MigrationDiscovery {
         }
 
         let sql_content = fs::read_to_string(&sql_path)?;
+        let operations = SqlParser::parse(&sql_content)?;
+        let affected_tables = SqlParser::extract_affected_tables(&operations);
 
         let id = dir_name.to_string();
 
@@ -61,8 +64,8 @@ impl MigrationDiscovery {
             name,
             timestamp,
             sql_content,
-            operations: vec![],
-            affected_tables: vec![],
+            operations,
+            affected_tables,
         }))
     }
 

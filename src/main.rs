@@ -2,10 +2,14 @@ mod error;
 mod models;
 mod cli;
 mod parser;
+mod analyzer;
+mod reporter;
 
 use clap::Parser;
 use cli::{Cli, Commands};
 use colored::*;
+use parser::migration::MigrationDiscovery;
+use reporter::OutputFormat;
 
 fn main() {
     let cli = Cli::parse();
@@ -15,7 +19,12 @@ fn main() {
             println!("{}", "Analyzing migrations...".bright_blue().bold());
 
             match run_analysis(&path, &format) {
-                Ok(_) => println!("\n{}", "Analysis complete!".green().bold()),
+                Ok(has_errors) => {
+                    println!("\n{}", "Analysis complete!".green().bold());
+                    if has_errors {
+                        std::process::exit(1);
+                    }
+                }
                 Err(e) => {
                     eprintln!("{} {}", "Error:".red().bold(), e);
                     std::process::exit(1)
@@ -30,8 +39,27 @@ fn main() {
     }
 }
 
-fn run_analysis(path: &str, format: &str) -> error::Result<()> {
-    println!("analyzing migrations at: {}", path);
-    println!("output format: {}", format);
-    Ok(())
+fn run_analysis(path: &str, format: &str) -> error::Result<bool> {
+    let migrations = MigrationDiscovery::discover(path)?;
+
+    if migrations.is_empty() {
+        println!("{}", "No migrations found.".yellow());
+        return Ok(false);
+    }
+
+    println!(
+        "Found {} migration(s). Running analysis...\n",
+        migrations.len()
+    );
+
+    let findings = analyzer::analyze(&migrations);
+
+    let output_format = OutputFormat::from_str(format);
+    reporter::report(&findings, &output_format);
+
+    let has_errors = findings.iter().any(|f| {
+        matches!(f.severity, models::Severity::Error)
+    });
+
+    Ok(has_errors)
 }
